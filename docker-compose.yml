@@ -1,0 +1,20 @@
+services:
+  fbm-auth-db:
+    image: postgres:16
+    container_name: fbm-auth-db
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_DB: fbm_auth
+      POSTGRES_USER: fbm_auth
+      POSTGRES_PASSWORD: fbm_auth_dev
+    volumes:
+      - fbm_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fbm_auth"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  fbm_auth_data:
