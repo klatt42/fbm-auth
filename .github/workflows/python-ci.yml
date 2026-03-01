@@ -74,15 +74,18 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
           cache: pip
-          cache-dependency-path: ${{ inputs.working-directory }}/requirements.txt
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt 2>/dev/null || true
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || true
+          fi
           pip install fbm-auth==0.1.0 --index-url https://pypi.org/simple/ 2>/dev/null || \
             pip install git+https://github.com/klatt42/fbm-auth.git@v0.1.0 2>/dev/null || \
             pip install git+https://github.com/klatt42/fbm-auth.git 2>/dev/null || true
-          pip install ruff pytest pytest-asyncio
+          pip install ruff==0.9.0 pytest pytest-asyncio
 
       - name: Lint
         run: ruff check .
