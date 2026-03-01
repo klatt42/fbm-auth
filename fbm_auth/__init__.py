@@ -20,7 +20,7 @@ from fbm_auth.middleware import add_cors
 from fbm_auth.models import APIKey, ServiceCredential, User
 from fbm_auth.passwords import hash_password, verify_password
 from fbm_auth.router import auth_router
-from fbm_auth.schemas import RefreshRequest, Token, TokenPayload, UserCreate, UserLogin, UserResponse
+from fbm_auth.schemas import ErrorResponse, RefreshRequest, Token, TokenPayload, UserCreate, UserLogin, UserResponse
 from fbm_auth.service_auth import ServiceIdentity
 
 __all__ = [
@@ -41,6 +41,7 @@ __all__ = [
     "UserResponse",
     "Token",
     "TokenPayload",
+    "ErrorResponse",
     "RefreshRequest",
     # JWT
     "create_access_token",

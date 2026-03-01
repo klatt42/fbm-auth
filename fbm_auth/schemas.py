@@ -50,3 +50,16 @@ class TokenPayload(BaseModel):
     tier: str | None = None
     exp: int
     iss: str = "fbm-auth"
+
+
+# --- Shared error response (used by all FBM Copilot Suite tools) ---
+
+class ErrorResponse(BaseModel):
+    """Standard error format for all FBM Copilot Suite APIs.
+
+    Every error response across all 5 tools should use this shape.
+    FastAPI's HTTPException `detail` field is always a string.
+    """
+    detail: str
+    error_type: str | None = None
+    path: str | None = None
