@@ -1,0 +1,108 @@
+name: FBM Suite Python CI
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.11"
+      working-directory:
+        description: "Working directory for Python commands"
+        type: string
+        default: "api"
+      has-frontend:
+        description: "Whether to run frontend build job"
+        type: boolean
+        default: false
+      frontend-directory:
+        description: "Working directory for frontend commands"
+        type: string
+        default: "dashboard"
+      node-version:
+        description: "Node.js version for frontend build"
+        type: string
+        default: "20"
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_db
+      FBM_AUTH_DB_URL: postgresql+asyncpg://test:test@localhost:5432/test_db
+      FBM_AUTH_JWT_SECRET: ci-test-secret-key
+      REDIS_URL: redis://localhost:6379/0
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+          cache-dependency-path: ${{ inputs.working-directory }}/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt 2>/dev/null || true
+          pip install fbm-auth==0.1.0 --index-url https://pypi.org/simple/ 2>/dev/null || \
+            pip install git+https://github.com/klatt42/fbm-auth.git@v0.1.0 2>/dev/null || \
+            pip install git+https://github.com/klatt42/fbm-auth.git 2>/dev/null || true
+          pip install ruff pytest pytest-asyncio
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest -v --tb=short
+
+  frontend:
+    if: ${{ inputs.has-frontend }}
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.frontend-directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build
+        run: npm run build
