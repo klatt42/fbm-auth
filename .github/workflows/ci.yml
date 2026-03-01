@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   ci:
-    uses: klatt42/fbm-auth/.github/workflows/python-ci.yml@main
+    uses: klatt42/fbm-auth/.github/workflows/python-ci.yml@master
     with:
       working-directory: .
       has-frontend: false
