@@ -17,7 +17,7 @@ class AuthBase(DeclarativeBase):
 async def init_auth_db() -> None:
     """Initialize the auth database connection. Call on app startup."""
     # Connection pool is lazy — this just validates the URL is reachable.
-    async with engine.begin() as conn:
+    async with engine.begin():
         pass
 
 

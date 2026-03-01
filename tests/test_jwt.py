@@ -1,8 +1,6 @@
 """Tests for JWT creation and validation."""
 
-import time
 import uuid
-from unittest.mock import patch
 
 import pytest
 
