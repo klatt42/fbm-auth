@@ -88,6 +88,8 @@ jobs:
             pip install -e ".[dev]" 2>/dev/null || pip install -e .
           fi
           pip install ruff==0.2.0 || true
+          # Ensure pytest is available (repos without it in requirements.txt)
+          pip install pytest pytest-asyncio 2>/dev/null || true
 
       - name: Lint
         run: ruff check .
